@@ -1,0 +1,152 @@
+<section class="space-y-10">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="rounded border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"><%= escapeHtml(error) %></div>
+  <% } %>
+
+  <div>
+    <h1 class="text-3xl font-semibold text-white">Public Dashboard</h1>
+    <p class="mt-2 text-sm text-slate-400">Track Shamil and Halit’s daily crypto research habits.</p>
+  </div>
+
+  <div>
+    <h2 class="text-xl font-semibold text-white">Today at a glance</h2>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <% stats.forEach(({ user, hasToday, lastActivity }) => { %>
+        <div class="rounded border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-lg font-semibold text-white"><%= user.name %></p>
+              <p class="text-xs text-slate-400">Last activity: <span class="js-utc-time" data-utc="<%= lastActivity || '' %>"><%= lastActivity ? 'Loading…' : 'No activity yet' %></span></p>
+            </div>
+            <span class="h-3 w-3 rounded-full <%= hasToday ? 'bg-emerald-400 shadow-[0_0_10px_#34d399]' : 'bg-slate-600' %>"></span>
+          </div>
+          <p class="mt-4 text-sm text-slate-300">
+            <% if (hasToday) { %>
+              Checked in today
+            <% } else { %>
+              Waiting for today’s check-in
+            <% } %>
+          </p>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-xl font-semibold text-white">Streak & Consistency</h2>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <% stats.forEach(({ user, streak, completion30, completion90, completion7 }) => { %>
+        <div class="rounded border border-slate-800 bg-slate-900/60 p-4">
+          <h3 class="text-lg font-semibold text-white"><%= user.name %></h3>
+          <dl class="mt-3 space-y-3 text-sm text-slate-300">
+            <div class="flex items-center justify-between">
+              <dt>Current streak</dt>
+              <dd class="font-semibold text-indigo-300"><%= streak %> day<%= streak === 1 ? '' : 's' %></dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt>Past 7 days</dt>
+              <dd><%= completion7.completedDays %>/<%= completion7.totalDays %> (<%= completion7.percent %>%)</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt>Past 30 days</dt>
+              <dd><%= completion30.completedDays %>/<%= completion30.totalDays %> (<%= completion30.percent %>%)</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt>Past 90 days</dt>
+              <dd><%= completion90.completedDays %>/<%= completion90.totalDays %> (<%= completion90.percent %>%)</dd>
+            </div>
+          </dl>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <div>
+    <h2 class="text-xl font-semibold text-white">90-day heatmap</h2>
+    <div class="mt-4 space-y-6">
+      <% stats.forEach(({ user, heatmap }) => { %>
+        <div class="rounded border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center justify-between text-sm text-slate-300">
+            <h3 class="text-lg font-semibold text-white"><%= user.name %></h3>
+            <a href="/u/<%= encodeURIComponent(user.name) %>" class="text-xs text-indigo-300 hover:text-indigo-200">View profile →</a>
+          </div>
+          <div class="mt-4 grid grid-cols-13 gap-1">
+            <% heatmap.forEach(({ day, count }) => { %>
+              <% const level = count === 0 ? 'bg-slate-800' : count === 1 ? 'bg-emerald-700/70' : 'bg-emerald-400'; %>
+              <div
+                class="h-4 w-4 rounded-sm <%= level %>"
+                title="<%= formatDayShort(day) %>: <%= count %> activity"
+              ></div>
+            <% }) %>
+          </div>
+          <div class="mt-2 text-xs text-slate-500">Latest 90 days</div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <div>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-xl font-semibold text-white">Recent Research</h2>
+        <p class="text-sm text-slate-400">Latest 30 entries from both users.</p>
+      </div>
+      <form method="GET" action="/public" class="flex flex-wrap gap-2 text-sm text-slate-300">
+        <label class="flex items-center gap-2">
+          User
+          <select name="user" class="rounded border border-slate-700 bg-slate-950 px-2 py-1" data-auto-submit>
+            <option value="All" <%= filterUser === 'All' ? 'selected' : '' %>>All</option>
+            <option value="Shamil" <%= filterUser === 'Shamil' ? 'selected' : '' %>>Shamil</option>
+            <option value="Halit" <%= filterUser === 'Halit' ? 'selected' : '' %>>Halit</option>
+          </select>
+        </label>
+        <label class="flex items-center gap-2">
+          Range
+          <select name="range" class="rounded border border-slate-700 bg-slate-950 px-2 py-1" data-auto-submit>
+            <option value="7" <%= rangeDays === 7 ? 'selected' : '' %>>7d</option>
+            <option value="30" <%= rangeDays === 30 ? 'selected' : '' %>>30d</option>
+            <option value="90" <%= rangeDays === 90 ? 'selected' : '' %>>90d</option>
+          </select>
+        </label>
+      </form>
+    </div>
+
+    <div class="mt-4 space-y-4">
+      <% if (!feed.length) { %>
+        <p class="text-sm text-slate-400">No research logged for this window.</p>
+      <% } %>
+      <% feed.forEach((entry) => { %>
+        <article class="rounded border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-white"><%= escapeHtml(entry.title) %></h3>
+              <p class="text-xs text-slate-400">By <span class="font-semibold text-indigo-300"><%= entry.user_name %></span> · <span><%= entry.day %></span></p>
+            </div>
+            <div class="text-xs text-slate-400">
+              <span>Minutes: <%= entry.minutes_spent ?? 0 %></span>
+              <span class="ml-3">Confidence: <%= entry.confidence || 0 %>/5</span>
+            </div>
+          </div>
+          <div class="mt-3 space-y-2">
+            <div class="leading-relaxed text-slate-200"><%- linkify(entry.summary || '').replace(/\n/g, '<br/>') %></div>
+            <% if (entry.tickers) { %>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <% entry.tickers.split(',').filter(Boolean).forEach((ticker) => { %>
+                  <span class="rounded-full bg-slate-800 px-2 py-1 font-semibold text-indigo-200"><%= ticker %></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <% if (entry.links && entry.links.length) { %>
+              <div class="flex flex-wrap gap-2 text-xs text-indigo-300">
+                <% entry.links.forEach((url) => { %>
+                  <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="truncate rounded bg-slate-800 px-2 py-1 hover:bg-slate-700"><%= url %></a>
+                <% }) %>
+              </div>
+            <% } %>
+          </div>
+          <div class="mt-3 text-xs text-slate-500">Logged <span class="js-utc-time" data-utc="<%= entry.created_at %>">Loading…</span></div>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>

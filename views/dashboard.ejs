@@ -1,0 +1,170 @@
+<section class="space-y-10">
+  <div class="rounded border border-slate-800 bg-slate-900/60 p-6">
+    <h1 class="text-3xl font-semibold text-white">Welcome, <%= currentUser.name %></h1>
+    <p class="mt-2 text-sm text-slate-400">Stay accountable by checking in and logging your research daily.</p>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2">
+    <section class="rounded border border-slate-800 bg-slate-900/60 p-6">
+      <h2 class="text-xl font-semibold text-white">Today</h2>
+      <% if (checkin) { %>
+        <p class="mt-2 text-sm text-slate-300">Checked in at <span class="js-utc-time" data-utc="<%= checkin.created_at %>">Loading…</span></p>
+      <% } else { %>
+        <p class="mt-2 text-sm text-slate-300">You have not checked in yet today.</p>
+      <% } %>
+      <form method="POST" action="/checkin" class="mt-4 space-y-4">
+        <div>
+          <label for="note" class="block text-sm font-medium text-slate-300">Note (optional)</label>
+          <textarea
+            id="note"
+            name="note"
+            rows="3"
+            class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Key focus for today"
+          ><%= checkin?.note ? escapeHtml(checkin.note) : '' %></textarea>
+        </div>
+        <button type="submit" class="w-full rounded bg-emerald-500 px-3 py-2 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-400">
+          <%= checkin ? 'Update check-in' : 'Check In' %>
+        </button>
+      </form>
+    </section>
+
+    <section class="rounded border border-slate-800 bg-slate-900/60 p-6">
+      <h2 class="text-xl font-semibold text-white">Add Research</h2>
+      <form method="POST" action="/research" class="mt-4 space-y-4">
+        <input type="hidden" name="day" value="<%= today %>" />
+        <div>
+          <label for="title" class="block text-sm font-medium text-slate-300">Title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            required
+            class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="summary" class="block text-sm font-medium text-slate-300">Summary</label>
+          <textarea
+            id="summary"
+            name="summary"
+            required
+            rows="4"
+            class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Key findings, hypotheses, questions..."
+          ></textarea>
+        </div>
+        <div>
+          <label for="tickers" class="block text-sm font-medium text-slate-300">Tickers</label>
+          <input
+            type="text"
+            id="tickers"
+            name="tickers"
+            placeholder="BTC,ETH"
+            class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300">Links</label>
+          <div data-links-container>
+            <input
+              type="url"
+              name="links"
+              placeholder="https://..."
+              class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          <button type="button" data-add-link class="mt-2 text-xs font-semibold text-indigo-300 hover:text-indigo-200">+ Add another link</button>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block text-sm font-medium text-slate-300">Confidence
+            <select name="confidence" class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <% for (let i = 1; i <= 5; i += 1) { %>
+                <option value="<%= i %>"><%= i %></option>
+              <% } %>
+            </select>
+          </label>
+          <label class="block text-sm font-medium text-slate-300">Minutes spent
+            <input
+              type="number"
+              name="minutes_spent"
+              min="0"
+              max="1440"
+              value="0"
+              class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </label>
+        </div>
+        <button type="submit" class="w-full rounded bg-indigo-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400">Save entry</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="rounded border border-slate-800 bg-slate-900/60 p-6">
+    <h2 class="text-xl font-semibold text-white">Your last 7 days</h2>
+    <p class="mt-2 text-sm text-slate-400">Quick access to edit or remove recent research.</p>
+    <div class="mt-4 space-y-4">
+      <% if (!recentResearch.length) { %>
+        <p class="text-sm text-slate-400">No entries logged in the last 7 days.</p>
+      <% } %>
+      <% recentResearch.forEach((entry) => { %>
+        <details class="rounded border border-slate-800 bg-slate-950/60 p-4">
+          <summary class="cursor-pointer text-sm text-white">
+            <span class="font-semibold"><%= escapeHtml(entry.title) %></span>
+            <span class="ml-2 text-xs text-slate-400"><%= entry.day %> · <%= entry.minutes_spent ?? 0 %> min · Confidence <%= entry.confidence || 0 %>/5</span>
+          </summary>
+          <div class="mt-4 space-y-4 text-sm text-slate-200">
+            <div class="leading-relaxed text-slate-200"><%- linkify(entry.summary || '').replace(/\n/g, '<br/>') %></div>
+            <% if (entry.tickers) { %>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <% entry.tickers.split(',').filter(Boolean).forEach((ticker) => { %>
+                  <span class="rounded-full bg-slate-800 px-2 py-1 font-semibold text-indigo-200"><%= ticker %></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <% if (entry.links && entry.links.length) { %>
+              <div class="flex flex-wrap gap-2 text-xs text-indigo-300">
+                <% entry.links.forEach((url) => { %>
+                  <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="truncate rounded bg-slate-800 px-2 py-1 hover:bg-slate-700"><%= url %></a>
+                <% }) %>
+              </div>
+            <% } %>
+            <form method="POST" action="/research/<%= entry.id %>/edit" class="space-y-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-400">Title</label>
+                <input type="text" name="title" value="<%= escapeHtml(entry.title) %>" required class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400">Summary</label>
+                <textarea name="summary" rows="3" required class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white"><%= escapeHtml(entry.summary) %></textarea>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-3">
+                <label class="block text-xs font-medium text-slate-400">Tickers
+                  <input type="text" name="tickers" value="<%= escapeHtml(entry.tickers || '') %>" class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
+                </label>
+                <label class="block text-xs font-medium text-slate-400">Confidence
+                  <select name="confidence" class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white">
+                    <% for (let i = 1; i <= 5; i += 1) { %>
+                      <option value="<%= i %>" <%= entry.confidence === i ? 'selected' : '' %>><%= i %></option>
+                    <% } %>
+                  </select>
+                </label>
+                <label class="block text-xs font-medium text-slate-400">Minutes
+                  <input type="number" name="minutes_spent" min="0" max="1440" value="<%= entry.minutes_spent ?? 0 %>" class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
+                </label>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400">Links (comma separated)</label>
+                <input type="text" name="links" value="<%= entry.links && entry.links.length ? escapeHtml(entry.links.join(', ')) : '' %>" class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" />
+              </div>
+              <button type="submit" class="rounded bg-indigo-500 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-400">Save changes</button>
+            </form>
+            <form method="POST" action="/research/<%= entry.id %>/delete" class="inline">
+              <button type="submit" class="mt-2 rounded bg-rose-500 px-3 py-2 text-xs font-semibold text-rose-100 hover:bg-rose-400">Delete</button>
+            </form>
+          </div>
+        </details>
+      <% }) %>
+    </div>
+  </section>
+</section>

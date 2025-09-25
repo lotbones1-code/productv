@@ -1,0 +1,19 @@
+<header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <a href="/public" class="text-lg font-semibold tracking-tight text-indigo-300">Crypto Research Check-In</a>
+    <nav class="flex items-center gap-4 text-sm text-slate-300">
+      <a href="/public" class="hover:text-white">Public</a>
+      <% if (currentUser) { %>
+        <a href="/dashboard" class="hover:text-white">Dashboard</a>
+      <% } %>
+      <% if (currentUser) { %>
+        <form method="POST" action="/logout" class="flex items-center gap-2">
+          <span class="text-xs text-slate-400">Logged in as <strong class="text-white"><%= currentUser.name %></strong></span>
+          <button type="submit" class="rounded bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:bg-slate-700">Logout</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="rounded bg-indigo-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-indigo-400">Login</a>
+      <% } %>
+    </nav>
+  </div>
+</header>
