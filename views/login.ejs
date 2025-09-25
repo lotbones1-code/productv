@@ -1,0 +1,20 @@
+<section class="mx-auto max-w-md rounded border border-slate-800 bg-slate-900/60 p-6 shadow-lg">
+  <h1 class="text-2xl font-semibold text-white">Login</h1>
+  <p class="mt-2 text-sm text-slate-400">Enter your name to access your dashboard.</p>
+  <form method="POST" action="/login" class="mt-6 space-y-4">
+    <div>
+      <label for="name" class="block text-sm font-medium text-slate-300">Name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        placeholder="Shamil or Halit"
+        required
+        class="mt-1 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+    </div>
+    <button type="submit" class="w-full rounded bg-indigo-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400">
+      Log In
+    </button>
+  </form>
+</section>

@@ -1,0 +1,8 @@
+<% if (flash) { %>
+  <div class="mb-6 rounded border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200">
+    <span class="font-semibold uppercase tracking-wide <%= flash.type === 'error' ? 'text-rose-300' : 'text-emerald-300' %>">
+      <%= flash.type === 'error' ? 'Error' : 'Info' %>
+    </span>
+    <div class="mt-1"><%= escapeHtml(flash.message) %></div>
+  </div>
+<% } %>

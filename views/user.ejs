@@ -1,0 +1,71 @@
+<section class="space-y-10">
+  <div class="rounded border border-slate-800 bg-slate-900/60 p-6">
+    <h1 class="text-3xl font-semibold text-white"><%= stats.user.name %></h1>
+    <p class="mt-2 text-sm text-slate-400">Current streak: <span class="font-semibold text-indigo-300"><%= stats.streak %> day<%= stats.streak === 1 ? '' : 's' %></span></p>
+    <div class="mt-3 grid gap-4 sm:grid-cols-3">
+      <div class="rounded border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
+        <p class="text-xs uppercase text-slate-400">Last 7 days</p>
+        <p class="mt-1 text-lg font-semibold text-white"><%= stats.completion7.completedDays %>/<%= stats.completion7.totalDays %> days</p>
+        <p class="text-xs text-slate-500"><%= stats.completion7.percent %>% completion</p>
+      </div>
+      <div class="rounded border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
+        <p class="text-xs uppercase text-slate-400">Last 30 days</p>
+        <p class="mt-1 text-lg font-semibold text-white"><%= stats.completion30.completedDays %>/<%= stats.completion30.totalDays %> days</p>
+        <p class="text-xs text-slate-500"><%= stats.completion30.percent %>% completion</p>
+      </div>
+      <div class="rounded border border-slate-800 bg-slate-950/60 p-4 text-sm text-slate-300">
+        <p class="text-xs uppercase text-slate-400">Last 90 days</p>
+        <p class="mt-1 text-lg font-semibold text-white"><%= stats.completion90.completedDays %>/<%= stats.completion90.totalDays %> days</p>
+        <p class="text-xs text-slate-500"><%= stats.completion90.percent %>% completion</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded border border-slate-800 bg-slate-900/60 p-6">
+    <h2 class="text-xl font-semibold text-white">90-day heatmap</h2>
+    <div class="mt-4 grid grid-cols-13 gap-1">
+      <% stats.heatmap.forEach(({ day, count }) => { %>
+        <% const level = count === 0 ? 'bg-slate-800' : count === 1 ? 'bg-emerald-700/70' : 'bg-emerald-400'; %>
+        <div class="h-4 w-4 rounded-sm <%= level %>" title="<%= formatDayShort(day) %>: <%= count %> activity"></div>
+      <% }) %>
+    </div>
+    <p class="mt-2 text-xs text-slate-500">Latest 90 days</p>
+  </div>
+
+  <div>
+    <h2 class="text-xl font-semibold text-white">Recent Research</h2>
+    <div class="mt-4 space-y-4">
+      <% if (!feed.length) { %>
+        <p class="text-sm text-slate-400">No research entries yet.</p>
+      <% } %>
+      <% feed.forEach((entry) => { %>
+        <article class="rounded border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-200">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-white"><%= escapeHtml(entry.title) %></h3>
+              <p class="text-xs text-slate-400"><%= entry.day %> · Confidence <%= entry.confidence || 0 %>/5 · <%= entry.minutes_spent ?? 0 %> minutes</p>
+            </div>
+          </div>
+          <div class="mt-3 space-y-2">
+            <div class="leading-relaxed text-slate-200"><%- linkify(entry.summary || '').replace(/\n/g, '<br/>') %></div>
+            <% if (entry.tickers) { %>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <% entry.tickers.split(',').filter(Boolean).forEach((ticker) => { %>
+                  <span class="rounded-full bg-slate-800 px-2 py-1 font-semibold text-indigo-200"><%= ticker %></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <% if (entry.links && entry.links.length) { %>
+              <div class="flex flex-wrap gap-2 text-xs text-indigo-300">
+                <% entry.links.forEach((url) => { %>
+                  <a href="<%= url %>" target="_blank" rel="noopener noreferrer" class="truncate rounded bg-slate-800 px-2 py-1 hover:bg-slate-700"><%= url %></a>
+                <% }) %>
+              </div>
+            <% } %>
+          </div>
+          <div class="mt-3 text-xs text-slate-500">Logged <span class="js-utc-time" data-utc="<%= entry.created_at %>">Loading…</span></div>
+        </article>
+      <% }) %>
+    </div>
+  </div>
+</section>
