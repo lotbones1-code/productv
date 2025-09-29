@@ -23,7 +23,7 @@
 
   <div class="rounded border border-slate-800 bg-slate-900/60 p-6">
     <h2 class="text-xl font-semibold text-white">90-day heatmap</h2>
-    <div class="mt-4 grid grid-cols-13 gap-1">
+    <div class="mt-4 grid grid-cols-[repeat(13,_minmax(0,_1fr))] grid-rows-7 grid-flow-col gap-1">
       <% stats.heatmap.forEach(({ day, count }) => { %>
         <% const level = count === 0 ? 'bg-slate-800' : count === 1 ? 'bg-emerald-700/70' : 'bg-emerald-400'; %>
         <div class="h-4 w-4 rounded-sm <%= level %>" title="<%= formatDayShort(day) %>: <%= count %> activity"></div>
