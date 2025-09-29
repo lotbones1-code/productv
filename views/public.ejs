@@ -70,7 +70,7 @@
             <h3 class="text-lg font-semibold text-white"><%= user.name %></h3>
             <a href="/u/<%= encodeURIComponent(user.name) %>" class="text-xs text-indigo-300 hover:text-indigo-200">View profile →</a>
           </div>
-          <div class="mt-4 grid grid-cols-13 gap-1">
+          <div class="mt-4 grid grid-cols-[repeat(13,_minmax(0,_1fr))] grid-rows-7 grid-flow-col gap-1">
             <% heatmap.forEach(({ day, count }) => { %>
               <% const level = count === 0 ? 'bg-slate-800' : count === 1 ? 'bg-emerald-700/70' : 'bg-emerald-400'; %>
               <div
